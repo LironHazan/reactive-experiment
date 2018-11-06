@@ -7,16 +7,16 @@ class Subject {
     this.subscribers = {};
   }
 
-  register(event, handlerFn) {
+  on(event, handlerFn) {
     if (!handlerFn) return;
     if (!this.subscribers[event]) this.subscribers[event] = [];
     this.subscribers[event].push(handlerFn);
-    return () => {
+    return (cb) => {
       this.subscribers[event] = this.subscribers[event].filter((fn) => fn !== cb);
     };
   }
 
-  notify(name, ...args) {
+  dispatch(name, ...args) {
     const events = this.subscribers[name];
     if (events) {
       events.forEach(fn => {
@@ -38,11 +38,11 @@ Object.keys(data).forEach(prop => {
   let internal = data[prop];
   Object.defineProperty(data, prop, {
     get() {
-      observable.register(prop, renderView);
+      observable.on(prop, renderView);
       return internal;
     },
     set(newVal) {
-      if (internal !== newVal) observable.notify(prop, newVal);
+      if (internal !== newVal) observable.dispatch(prop, newVal);
     }
   })
 });
